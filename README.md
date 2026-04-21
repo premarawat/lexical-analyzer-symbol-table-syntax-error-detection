@@ -9,6 +9,7 @@ A **Compiler Design Project** that implements a **Lexical Analyzer**, **Symbol T
 This project simulates the **front-end phases of a compiler**, focusing on:
 
 * Token generation (Lexical Analysis)
+* DFA Validation
 * Symbol Table creation
 * Syntax error detection with line tracking
 
@@ -165,7 +166,6 @@ The lexical analyzer groups characters into tokens and removes unnecessary eleme
 * Add semantic analysis phase
 * Improve UI/UX of dashboard
 * Support more programming constructs
-* Export results as PDF
 * Real-time code editor integration
 
 ---
