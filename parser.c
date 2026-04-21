@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-struct symbol {
+struct symbol
+{
     char name[50];
     char type[20];
     char value[50];
@@ -63,22 +64,30 @@ void match(char expect[])
         exit(1);
     }
 }
-void declaration(){
+void declaration()
+{
     char type[20], name[50], value[50] = "-";
 
-    strcpy(type, tokenvalue[pos]);  
+    strcpy(type, tokenvalue[pos]);
     match("KEYWORD");
 
-    strcpy(name, tokenvalue[pos]);  
+    strcpy(name, tokenvalue[pos]);
     match("IDENTIFIER");
 
-    if(strcmp(token[pos],"OPERATOR")==0){
+    if (strcmp(token[pos], "OPERATOR") == 0)
+    {
         match("OPERATOR");
 
-        strcpy(value, tokenvalue[pos]); 
+        strcpy(value, tokenvalue[pos]);
         match("CONSTANT");
     }
     insert(name, type, value, lineno[pos]);
+    if (strcmp(token[pos], "SEPARATOR") != 0)
+    {
+        int errline = (pos > 0) ? lineno[pos - 1] : lineno[pos];
+        printf("Syntax Error: Missing ';' at line %d\n", errline);
+        exit(1); 
+    }
     match("SEPARATOR");
 }
 void expression()
@@ -104,22 +113,36 @@ void expression()
         }
     }
 }
-void assignment(){
+void assignment()
+{
     char name[50], value[50] = "", temp[50];
 
     strcpy(name, tokenvalue[pos]);
     match("IDENTIFIER");
-    match("OPERATOR");  
+    match("OPERATOR");
     strcpy(value, tokenvalue[pos]);
-    match(token[pos]);  
-    if(strcmp(token[pos], "OPERATOR") == 0){
-        strcat(value, tokenvalue[pos]);  
+    if (strcmp(token[pos], "IDENTIFIER") == 0)
+        match("IDENTIFIER");
+    else
+        match("CONSTANT");
+    if (strcmp(token[pos], "OPERATOR") == 0)
+    {
+        strcat(value, tokenvalue[pos]);
         match("OPERATOR");
 
-        strcat(value, tokenvalue[pos]);  
-        match(token[pos]);  
+        strcat(value, tokenvalue[pos]);
+        if (strcmp(token[pos], "IDENTIFIER") == 0)
+            match("IDENTIFIER");
+        else
+            match("CONSTANT");
     }
-    int line = lineno[pos];
+    int line = (pos > 0) ? lineno[pos - 1] : lineno[pos];
+    if (strcmp(token[pos], "SEPARATOR") != 0)
+    {
+        int errline = (pos > 0) ? lineno[pos - 1] : lineno[pos];
+        printf("Syntax Error: Missing ';' at line %d\n", errline);
+        exit(1);
+    }
     match("SEPARATOR");
     insert(name, "", value, line);
 }
@@ -138,106 +161,125 @@ void condition()
 }
 void function_call()
 {
-    match("IDENTIFIER"); 
-    match("SEPARATOR");  
-    match("STRING");    
-    match("SEPARATOR");  
-    match("SEPARATOR");  
+    match("IDENTIFIER");
+    match("SEPARATOR");
+    match("STRING");
+    match("SEPARATOR");
+    match("SEPARATOR");
 }
 void return_stmt()
 {
-    match("KEYWORD");   
-    match("CONSTANT");  
-    match("SEPARATOR"); 
+    match("KEYWORD");
+    match("CONSTANT");
+    match("SEPARATOR");
 }
-void if_statement(){
-    match("KEYWORD");      
-    match("SEPARATOR");    
+void if_statement()
+{
+    match("KEYWORD");
+    match("SEPARATOR");
     condition();
-    match("SEPARATOR");    
-    match("SEPARATOR");    
-    while(!(strcmp(token[pos],"SEPARATOR")==0 &&
-            strcmp(tokenvalue[pos],"}")==0)){
+    match("SEPARATOR");
+    match("SEPARATOR");
+    while (!(strcmp(token[pos], "SEPARATOR") == 0 &&
+             strcmp(tokenvalue[pos], "}") == 0))
+    {
         statement();
     }
-    match("SEPARATOR");    
+    match("SEPARATOR");
 }
-void function_def(){
-    match("KEYWORD");      
-    match("IDENTIFIER");  
-    match("SEPARATOR");    
-    match("SEPARATOR");   
-    match("SEPARATOR");    
-    while(!(strcmp(token[pos],"SEPARATOR")==0 &&
-            strcmp(tokenvalue[pos],"}")==0)){
+void function_def()
+{
+    match("KEYWORD");
+    match("IDENTIFIER");
+    match("SEPARATOR");
+    match("SEPARATOR");
+    match("SEPARATOR");
+    while (!(strcmp(token[pos], "SEPARATOR") == 0 &&
+             strcmp(tokenvalue[pos], "}") == 0))
+    {
         statement();
     }
-    match("SEPARATOR");    
+    match("SEPARATOR");
 }
-void statement(){
-    if(strcmp(token[pos],"KEYWORD")==0 &&
-       (strcmp(tokenvalue[pos],"int")==0 ||
-        strcmp(tokenvalue[pos],"float")==0 ||
-        strcmp(tokenvalue[pos],"char")==0)){
+void statement()
+{
+    if (strcmp(token[pos], "KEYWORD") == 0 &&
+        (strcmp(tokenvalue[pos], "int") == 0 ||
+         strcmp(tokenvalue[pos], "float") == 0 ||
+         strcmp(tokenvalue[pos], "char") == 0))
+    {
         declaration();
     }
-    else if(strcmp(token[pos],"KEYWORD")==0 &&
-            strcmp(tokenvalue[pos],"if")==0){
+    else if (strcmp(token[pos], "KEYWORD") == 0 &&
+             strcmp(tokenvalue[pos], "if") == 0)
+    {
         if_statement();
     }
-    else if(strcmp(token[pos],"KEYWORD")==0 &&
-            strcmp(tokenvalue[pos],"else")==0){
-        match("KEYWORD");      
-        match("SEPARATOR");    
-        while(!(strcmp(token[pos],"SEPARATOR")==0 &&
-                strcmp(tokenvalue[pos],"}")==0)){
+    else if (strcmp(token[pos], "KEYWORD") == 0 &&
+             strcmp(tokenvalue[pos], "else") == 0)
+    {
+        match("KEYWORD");
+        match("SEPARATOR");
+        while (!(strcmp(token[pos], "SEPARATOR") == 0 &&
+                 strcmp(tokenvalue[pos], "}") == 0))
+        {
             statement();
         }
-        match("SEPARATOR");    
+        match("SEPARATOR");
     }
-    else if(strcmp(token[pos],"KEYWORD")==0 &&
-            strcmp(tokenvalue[pos],"return")==0){
+    else if (strcmp(token[pos], "KEYWORD") == 0 &&
+             strcmp(tokenvalue[pos], "return") == 0)
+    {
         return_stmt();
     }
-    else if(strcmp(token[pos],"IDENTIFIER")==0 &&
-            strcmp(token[pos+1],"SEPARATOR")==0 &&
-            strcmp(tokenvalue[pos+1],"(")==0){
+    else if (strcmp(token[pos], "IDENTIFIER") == 0 &&
+             strcmp(token[pos + 1], "SEPARATOR") == 0 &&
+             strcmp(tokenvalue[pos + 1], "(") == 0)
+    {
         function_call();
     }
-    else if(strcmp(token[pos],"IDENTIFIER")==0){
+    else if (strcmp(token[pos], "IDENTIFIER") == 0)
+    {
         assignment();
     }
-    else{
+    else
+    {
         printf("Invalid statement at line %d\n", lineno[pos]);
         exit(1);
     }
 }
-void insert(char name[], char type[], char value[], int line){
-    for(int i=0;i<symcount;i++){
-        if(strcmp(symtab[i].name,name)==0){
-            strcpy(symtab[i].value,value);
+void insert(char name[], char type[], char value[], int line)
+{
+    for (int i = 0; i < symcount; i++)
+    {
+        if (strcmp(symtab[i].name, name) == 0)
+        {
+            strcpy(symtab[i].value, value);
             return;
         }
     }
-    strcpy(symtab[symcount].name,name);
-    strcpy(symtab[symcount].type,type);
-    strcpy(symtab[symcount].value,value);
-    symtab[symcount].line=line;
+    strcpy(symtab[symcount].name, name);
+    strcpy(symtab[symcount].type, type);
+    strcpy(symtab[symcount].value, value);
+    symtab[symcount].line = line;
     symcount++;
 }
-void print_symbol_table(){
+void print_symbol_table()
+{
     printf("\n\nSYMBOL TABLE\n");
     printf("Name\tType\tValue\tLine\n");
 
-    for(int i=0;i<symcount;i++){
+    for (int i = 0; i < symcount; i++)
+    {
         printf("%s\t%s\t%s\t%d\n",
-            symtab[i].name,
-            symtab[i].type,
-            symtab[i].value,
-            symtab[i].line);
+               symtab[i].name,
+               symtab[i].type,
+               symtab[i].value,
+               symtab[i].line);
     }
 }
-void parser(){
+void parser()
+{
     function_def();
     printf("Syntax is valid\n");
     print_symbol_table();
