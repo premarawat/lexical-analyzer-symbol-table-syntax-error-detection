@@ -1,205 +1,180 @@
-# Lexical Analyzer with Symbol Table and Syntax Error Detection
+# 🔍 Lexical Analyzer with Symbol Table & Syntax Error Detection
 
-### Mini Compiler Front-End (C Language)
-
-## 📌 Project Description
-
-This project implements the **front-end phases of a compiler** for a subset of the C programming language. The system performs lexical analysis, syntax analysis, error detection, and symbol table generation. The program reads a C source file, tokenizes it, checks the syntax using a recursive descent parser, and builds a symbol table for identifiers.
-
-This project is developed as part of **Problem Based Learning (PBL)** to understand the working of compiler design concepts.
+A **Compiler Design Project** that implements a **Lexical Analyzer**, **Symbol Table**, and **Syntax Error Detection System** using C and integrates with a simple web-based interface.
 
 ---
 
-## 🎯 Objectives
+## 📌 Project Overview
 
-* To design and implement a **Lexical Analyzer** to generate tokens.
-* To implement a **Syntax Analyzer (Parser)** to check grammar rules.
-* To implement **Syntax Error Detection** with line numbers.
-* To build a **Symbol Table** for identifiers.
-* To understand the **front-end phases of a compiler**.
+This project simulates the **front-end phases of a compiler**, focusing on:
+
+* Token generation (Lexical Analysis)
+* Symbol Table creation
+* Syntax error detection with line tracking
+
+A lexical analyzer is the **first phase of a compiler**, responsible for converting source code into meaningful tokens ([GeeksforGeeks][1]).
 
 ---
 
 ## ⚙️ Features
 
-* Reads input C program from file.
-* Removes comments and preprocessor directives.
-* Identifies tokens:
+✅ **Lexical Analysis**
+
+* Breaks source code into tokens
+* Identifies:
 
   * Keywords
   * Identifiers
-  * Constants
   * Operators
-  * Separators
-  * Strings
-* Generates token file (`token.txt`).
-* Performs syntax analysis using recursive descent parsing.
-* Detects syntax errors with proper line numbers.
-* Creates and displays symbol table.
-* Stores identifier name, type, value, and line number.
+  * Constants
+  * Symbols
+
+✅ **Symbol Table Generation**
+
+* Stores identifiers and their attributes
+* Helps in semantic analysis
+
+✅ **Syntax Error Detection**
+
+* Detects invalid syntax
+* Displays correct **line numbers for errors**
+
+✅ **Token Output**
+
+* Generates token list in structured format
+
+✅ **Web Interface (Node.js + HTML)**
+
+* Upload input file
+* View tokens and errors visually
 
 ---
 
-## 🧠 Compiler Phases Implemented
+## 🛠️ Technologies Used
 
-| Phase            | Description                             |
-| ---------------- | --------------------------------------- |
-| Lexical Analysis | Converts source code into tokens        |
-| Syntax Analysis  | Checks syntax using grammar rules       |
-| Symbol Table     | Stores identifier information           |
-| Error Handling   | Detects syntax errors with line numbers |
+* **C Language** → Core compiler logic
+* **Lex / DFA Concepts** → Token recognition
+* **Node.js (Express)** → Backend server
+* **HTML, CSS, JavaScript** → Frontend UI
 
 ---
 
 ## 📂 Project Structure
 
-```text
-Lexical-Analyzer-Project/
+```
+sample/
+│── public/
+│   ├── index.html
+│   ├── styles.css
 │
-├── lexer.c            → Lexical Analyzer
-├── parser.c           → Syntax Analyzer + Symbol Table
-├── inputsample.c      → Input C Program
-├── token.txt          → Generated Tokens
-├── README.md          → Project Documentation
+│── app.js
+│── server.js
+│
+│── lex.c              # Lexical analyzer
+│── parser.c           # Syntax analyzer
+│── dfa.c              # DFA for identifier validation
+│── inputsample.c      # Sample input program
+│── token.txt          # Generated tokens
+│
+│── package.json
+│── README.md
 ```
 
 ---
 
-## ▶️ How to Run the Project
+## 🚀 How to Run
 
-### Step 1: Compile Lexical Analyzer
-
-```bash
-gcc lexer.c -o lexer
-```
-
-### Step 2: Run Lexical Analyzer
+### 1️⃣ Clone the Repository
 
 ```bash
-./lexer
+git clone https://github.com/premarawat/lexical-analyzer-symbol-table-syntax-error-detection.git
+cd lexical-analyzer-symbol-table-syntax-error-detection
 ```
 
-This will generate:
+---
 
-```
-token.txt
-```
-
-### Step 3: Compile Parser
+### 2️⃣ Compile C Programs
 
 ```bash
+gcc lex.c -o lex
 gcc parser.c -o parser
-```
-
-### Step 4: Run Parser
-
-```bash
-./parser
+gcc dfa.c -o dfa
 ```
 
 ---
 
-## 📝 Sample Input Program
+### 3️⃣ Run Backend Server
+
+```bash
+npm install
+node server.js
+```
+
+---
+
+### 4️⃣ Open in Browser
+
+```
+http://localhost:3000
+```
+
+---
+
+## 📊 Example
+
+### Input
 
 ```c
-#include<stdio.h>
-int main() {
-    int a = 10;
-    float b = 20.5;
-    int sum;
-    sum = a + b;
-    if(sum > 20) {
-        printf("Greater value");
-    }
-    else {
-        printf("Smaller value");
-    }
-    return 0;
-}
+int a = 10;
+float b = 20.5;
+```
+
+### Output Tokens
+
+```
+int → Keyword
+a → Identifier
+= → Operator
+10 → Constant
 ```
 
 ---
 
-## 🔎 Sample Symbol Table Output
+## 🧠 Working
 
-```
-SYMBOL TABLE
-Name    Type    Value   Line
-a       int     10      4
-b       float   20.5    5
-sum     int     a+b     6
-```
+1. Input source code is read
+2. Lexical analyzer scans character by character
+3. Tokens are generated
+4. Symbol table is updated
+5. Syntax errors are detected and displayed
 
----
-
-## 📖 Grammar Used
-
-```
-program → function
-function → int main() { statements }
-
-statements → statement statements | ε
-
-statement → declaration
-statement → assignment
-statement → if_statement
-statement → else_block
-statement → function_call
-statement → return_statement
-
-declaration → datatype identifier ;
-declaration → datatype identifier = constant ;
-
-assignment → identifier = expression ;
-
-expression → identifier
-expression → constant
-expression → identifier operator identifier
-
-if_statement → if ( condition ) { statements }
-
-condition → identifier operator identifier
-condition → identifier operator constant
-
-function_call → identifier ( string ) ;
-
-return_statement → return constant ;
-```
+The lexical analyzer groups characters into tokens and removes unnecessary elements like whitespace and comments ([BrainKart][2]).
 
 ---
 
-## 📚 Concepts Used
+## 📸 Output Screenshots
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/40977e65-2b5f-457f-a58f-045d32a60e45" />
 
-* Lexical Analysis
-* Tokenization
-* Recursive Descent Parsing
-* Context-Free Grammar (CFG)
-* Symbol Table Management
-* Syntax Error Handling
-* File Handling in C
+
 
 ---
 
-## 🎓 Learning Outcomes
+## 🔮 Future Improvements
 
-* Understanding of compiler design phases.
-* Implementation of lexical analyzer and parser.
-* Understanding of symbol table usage.
-* Error detection in source code.
-* Working with file handling in C.
-
----
-
-## 📌 Conclusion
-
-This project demonstrates the working of a **mini compiler front-end** by implementing lexical analysis, syntax analysis, and symbol table management. It helps in understanding how compilers analyze source code and detect syntax errors before code execution.
+* Add semantic analysis phase
+* Improve UI/UX of dashboard
+* Support more programming constructs
+* Export results as PDF
+* Real-time code editor integration
 
 ---
 
 ## 👩‍💻 Author
 
-**Project:** Lexical Analyzer with Symbol Table and Syntax Error Detection
-**Language:** C
-**Type:** Compiler Design Mini Project 
+**Prema Rawat**
 
 ---
+
+## 📄 License
+
+This project is for educational purposes.
