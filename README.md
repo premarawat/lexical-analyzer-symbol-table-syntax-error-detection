@@ -153,7 +153,8 @@ The lexical analyzer groups characters into tokens and removes unnecessary eleme
 ---
 
 ## 📸 Output Screenshots
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/40977e65-2b5f-457f-a58f-045d32a60e45" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ba4ef3b0-9f9e-4e5e-aeae-57c85f81da33" />
+
 
 
 
