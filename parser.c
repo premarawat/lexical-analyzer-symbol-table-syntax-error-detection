@@ -349,9 +349,25 @@ for (int i = 0; i < symcount; i++)
 
 void parser()
 {
-function_def();
-printf("Syntax is valid\n");
-print_symbol_table();
+    // 🔥 HANDLE GLOBAL DECLARATIONS FIRST
+    while (strcmp(token[pos], "KEYWORD") == 0 &&
+           (strcmp(tokenvalue[pos], "int") == 0 ||
+            strcmp(tokenvalue[pos], "float") == 0 ||
+            strcmp(tokenvalue[pos], "char") == 0))
+    {
+        // look ahead: if next is main → stop
+        if (strcmp(token[pos + 1], "IDENTIFIER") == 0 &&
+            strcmp(tokenvalue[pos + 1], "main") == 0)
+            break;
+
+        declaration();   // global variable
+    }
+
+    // 🔥 NOW PARSE FUNCTION
+    function_def();
+
+    printf("Syntax is valid\n");
+    print_symbol_table();
 }
 
 int main()
