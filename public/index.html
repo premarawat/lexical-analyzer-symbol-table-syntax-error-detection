@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LexiCore - Compiler Analysis Toolkit</title>
+    <!-- Use Inter font for modern typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2pdf for exporting to PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-mode" id="body">
+    <div class="app-container" id="pdf-root">
+        
+        <!-- Header Section -->
+        <header class="glass-header">
+            <div class="logo">
+                <i class="fa-solid fa-microchip"></i> LexiCore
+            </div>
+            <div class="header-controls">
+                <div class="history-dropdown">
+                    <button id="history-btn" class="icon-btn"><i class="fa-solid fa-clock-rotate-left"></i> History</button>
+                    <div class="history-menu hidden" id="history-menu">
+                        <div class="history-header">Previous Codes</div>
+                        <ul id="history-list">
+                            <!-- Populated via JS -->
+                        </ul>
+                    </div>
+                </div>
+                <button id="theme-toggle" class="icon-btn"><i class="fa-solid fa-sun"></i></button>
+                <button id="export-pdf-btn" class="primary-btn"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="workspace">
+            
+            <!-- Left Panel: Code Editor -->
+            <section class="panel editor-panel glass-panel">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-code"></i> Source Code</h2>
+                </div>
+                <div class="editor-container">
+                    <div class="line-numbers" id="line-numbers">1</div>
+                    <!-- The textarea where users type the C code -->
+                    <textarea id="code-editor" spellcheck="false" placeholder="// Write C code here..."></textarea>
+                </div>
+                
+                <!-- DFA Validation Area -->
+                <div class="dfa-section glass-card" style="margin: 1.5rem; margin-top: 1rem;">
+                    <div class="section-title">DFA Identifier Validation</div>
+                    <div class="dfa-input-group">
+                        <input type="text" id="dfa-input" placeholder="Enter identifier to test..." />
+                        <button id="dfa-test-btn" class="secondary-btn">Test DFA</button>
+                    </div>
+                    <div id="dfa-result" class="dfa-result hidden"></div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Output and validation -->
+            <section class="panel output-panel glass-panel">
+
+                <!-- Main Analysis Control -->
+                <div class="analysis-control" style="display: flex; gap: 10px; position: relative;">
+                    <div style="position: absolute; top: -25px; right: 5px; font-size: 12px; color: #10b981; font-weight: 600; display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px;">
+                        <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #10b981; animation: pulseError 2s infinite;"></span> Auto-Sync Active
+                    </div>
+                    <button id="run-btn" class="run-btn" style="flex: 1;"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Output</button>
+                    <button id="tree-btn" class="secondary-btn" style="flex: 1; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: white; border-radius: 6px; cursor: pointer; transition: 0.3s;"><i class="fa-solid fa-network-wired"></i> View Parse Tree</button>
+                </div>
+
+                <!-- Parse Tree Display Modal/Area (hidden by default) -->
+                <div id="tree-modal" class="glass-card hidden" style="margin-top: 1rem; padding: 1rem;">
+                    <div class="section-title">Parse Tree Visualization</div>
+                    <div id="tree-container" style="overflow: auto; max-height: 300px; font-family: monospace; font-size: 14px; color: var(--text-primary); white-space: pre; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 4px;">
+                        Click "View Parse Tree" to generate.
+                    </div>
+                </div>
+
+                <!-- Results Output Areas (Vertical Stream) -->
+                <div class="results-container">
+                    
+                    <!-- Section 1: Generated Tokens -->
+                    <div class="result-card">
+                        <div class="card-header">
+                            <i class="fa-solid fa-list-check"></i>
+                            <h3>Generated Tokens</h3>
+                        </div>
+                        <div class="table-container tokens-scroll-container">
+                            <table id="tokens-table" class="tokens-table hidden">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Value</th>
+                                        <th>Line</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tokens-table-body">
+                                </tbody>
+                            </table>
+                            <div id="tokens-placeholder" class="empty">
+                                Run analysis to see tokens...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Syntax Analysis Status -->
+                    <div class="result-card">
+                        <div class="card-header">
+                            <i class="fa-solid fa-stethoscope"></i>
+                            <h3>Syntax Analysis Status</h3>
+                        </div>
+                        <div id="syntax-status" class="status-box empty">Ready</div>
+                    </div>
+
+                    <!-- Section 3: Symbol Table -->
+                    <div class="result-card">
+                        <div class="card-header">
+                            <i class="fa-solid fa-table-list"></i>
+                            <h3>Symbol Table</h3>
+                        </div>
+                        <div class="table-container">
+                            <table class="symbol-table hidden" id="symbol-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Value</th>
+                                        <th>Line</th>
+                                        <th>Scope</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="symbol-table-body">
+                                </tbody>
+                            </table>
+                            <div id="table-placeholder" class="empty">
+                                Symbol table goes here...
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+        </main>
+    </div>
+    
+    <!-- Hidden Professional PDF Report Template (Not visible in UI) -->
+    <div id="pdf-report-template" style="display: none;">
+        <div class="report-page">
+            <header class="report-header">
+                <div class="header-main">
+                    <h1>LexiCore – Compiler Analysis Report</h1>
+                    <p class="subtitle">Generated Output Summary</p>
+                </div>
+                <div class="header-meta" id="report-date">
+                    <!-- Date will be injected here -->
+                </div>
+            </header>
+            
+            <hr class="report-divider">
+
+            <section class="report-section">
+                <h2>1. Source Code</h2>
+                <div class="source-code-box" id="report-source-code">
+                    <!-- Code with line numbers will be injected here -->
+                </div>
+            </section>
+
+            <section class="report-section">
+                <h2>2. Generated Tokens</h2>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Value</th>
+                            <th>Line</th>
+                        </tr>
+                    </thead>
+                    <tbody id="report-tokens-body">
+                        <!-- Tokens will be injected here -->
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="report-section">
+                <h2>3. Syntax Analysis Status</h2>
+                <div id="report-syntax-status" class="report-status-box">
+                    <!-- Status will be injected here -->
+                </div>
+            </section>
+
+            <section class="report-section">
+                <h2>4. Symbol Table</h2>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Value</th>
+                            <th>Line</th>
+                            <th>Scope</th>
+                        </tr>
+                    </thead>
+                    <tbody id="report-symbol-table-body">
+                        <!-- Symbol table rows will be injected here -->
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="report-section">
+                <h2>5. DFA Identifier Validation</h2>
+                <div class="dfa-report-box">
+                    <p><strong>Input Identifier:</strong> <span id="report-dfa-input"></span></p>
+                    <p><strong>Validation Result:</strong> <span id="report-dfa-result"></span></p>
+                </div>
+            </section>
+
+            <footer class="report-footer">
+                <p>© LexiCore Compiler Toolkit - Academic Analysis Report</p>
+            </footer>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
