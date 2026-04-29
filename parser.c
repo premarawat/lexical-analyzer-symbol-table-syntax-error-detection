@@ -90,9 +90,8 @@ match("IDENTIFIER");
 if (strcmp(token[pos], "OPERATOR") == 0)
 {
     match("OPERATOR");
-    strcpy(value, tokenvalue[pos]);
-    match("CONSTANT");
-}
+    expression(value); 
+}      
 
 insert(name, type, value, lineno[pos]);
 
@@ -107,25 +106,29 @@ match("SEPARATOR");
 
 }
 
-void expression()
+void expression(char *result)
 {
-if (strcmp(token[pos], "IDENTIFIER") == 0)
-match("IDENTIFIER");
-else
-match("CONSTANT");
+    result[0] = '\0';  
 
-
-if (strcmp(token[pos], "OPERATOR") == 0)
-{
-    match("OPERATOR");
+    strcat(result, tokenvalue[pos]);
 
     if (strcmp(token[pos], "IDENTIFIER") == 0)
         match("IDENTIFIER");
     else
         match("CONSTANT");
-}
 
+    if (strcmp(token[pos], "OPERATOR") == 0)
+    {
+        strcat(result, tokenvalue[pos]);
+        match("OPERATOR");
 
+        strcat(result, tokenvalue[pos]);
+
+        if (strcmp(token[pos], "IDENTIFIER") == 0)
+            match("IDENTIFIER");
+        else
+            match("CONSTANT");
+    }
 }
 
 void assignment()

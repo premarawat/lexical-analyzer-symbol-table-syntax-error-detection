@@ -125,7 +125,7 @@ struct Node *declaration()
     {
         skip("OPERATOR"); // skip '='
         struct Node *valNode = create_node("Value");
-        add_child(valNode, match_val("CONSTANT"));
+        add_child(valNode, expression());
         add_child(node, valNode);
     }
     skip("SEPARATOR"); // skip ';'
